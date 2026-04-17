@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Library System</title>
+</head>
+<body>
+  <h1>📚 Online Library</h1>
+
+  <h2>Books</h2>
+  <button onclick="loadBooks()">Load Books</button>
+  <ul id="books"></ul>
+
+  <h2>Request Book</h2>
+  <input id="name" placeholder="Your Name"><br>
+  <input id="bookId" placeholder="Book ID"><br>
+  <input id="type" placeholder="pickup/delivery"><br>
+  <input id="address" placeholder="Address"><br>
+  <button onclick="requestBook()">Request</button>
+
+  <h2>Orders</h2>
+  <button onclick="loadOrders()">View Orders</button>
+  <ul id="orders"></ul>
+
+<script>
+async function loadBooks() {
+  const res = await fetch('/books');
+  const data = await res.json();
+  document.getElementById('books').innerHTML =
+    data.map(b => `<li>${b.id} - ${b.name}</li>`).join('');
+}
+
+async function requestBook() {
+  const userName = document.getElementById('name').value;
+  const bookId = document.getElementById('bookId').value;
+  const type = document.getElementById('type').value;
+  const address = document.getElementById('address').value;
+
+  await fetch('/request', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ userName, bookId, type, address })
+  });
+
+  alert("Book Requested!");
+}
+
+async function loadOrders() {
+  const res = await fetch('/orders');
+  const data = await res.json();
+  document.getElementById('orders').innerHTML =
+    data.map(o => `<li>${o.userName} - Book ${o.bookId} (${o.type}) [${o.status}]</li>`).join('');
+}
+</script>
+
+</body>
+</html>
