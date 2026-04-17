@@ -24,4 +24,5 @@ jobs:
     - name: Run Tests
       run: node node_modules/jest/bin/jest.js --passWithNoTests
 
-    
+    - name: Build Docker Image
+      run: docker build -t library-app .
