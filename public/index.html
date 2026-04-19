@@ -2,31 +2,132 @@
 <html>
 <head>
   <title>Library System</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f7fb;
+      margin: 0;
+    }
+
+    header {
+      background: #4a6cf7;
+      color: white;
+      padding: 15px;
+      text-align: center;
+      font-size: 22px;
+      font-weight: bold;
+    }
+
+    .container {
+      display: flex;
+      gap: 20px;
+      padding: 20px;
+    }
+
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      flex: 1;
+    }
+
+    h2 {
+      margin-top: 0;
+    }
+
+    button {
+      background: #4a6cf7;
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      background: #3a55d1;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 8px;
+      margin: 5px 0;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    ul {
+      padding-left: 20px;
+    }
+
+    .status {
+      font-weight: bold;
+    }
+
+    .pending {
+      color: orange;
+    }
+
+    .completed {
+      color: green;
+    }
+  </style>
 </head>
+
 <body>
-  <h1>📚 Online Library</h1>
 
-  <h2>Books</h2>
-  <button onclick="loadBooks()">Load Books</button>
-  <ul id="books"></ul>
+<header>
+  📚 Online Library System
+</header>
 
-  <h2>Request Book</h2>
-  <input id="name" placeholder="Your Name"><br>
-  <input id="bookId" placeholder="Book ID"><br>
-  <input id="type" placeholder="pickup/delivery"><br>
-  <input id="address" placeholder="Address"><br>
-  <button onclick="requestBook()">Request</button>
+<div class="container">
 
-  <h2>Orders</h2>
-  <button onclick="loadOrders()">View Orders</button>
-  <ul id="orders"></ul>
+  <!-- Books -->
+  <div class="card">
+    <h2>📖 Books</h2>
+    <button onclick="loadBooks()">Load Books</button>
+    <ul id="books"></ul>
+  </div>
+
+  <!-- Request -->
+  <div class="card">
+    <h2>📦 Request Book</h2>
+    <input id="name" placeholder="Your Name">
+    
+    <select id="bookId">
+      <option value="1">Harry Potter</option>
+      <option value="2">Atomic Habits</option>
+      <option value="3">Rich Dad Poor Dad</option>
+    </select>
+
+    <select id="type">
+      <option value="pickup">Pickup</option>
+      <option value="delivery">Delivery</option>
+    </select>
+
+    <input id="address" placeholder="Address (for delivery)">
+
+    <button onclick="requestBook()">Request Book</button>
+  </div>
+
+  <!-- Orders -->
+  <div class="card">
+    <h2>📋 Orders</h2>
+    <button onclick="loadOrders()">Refresh Orders</button>
+    <ul id="orders"></ul>
+  </div>
+
+</div>
 
 <script>
 async function loadBooks() {
   const res = await fetch('/books');
   const data = await res.json();
+
   document.getElementById('books').innerHTML =
-    data.map(b => `<li>${b.id} - ${b.name}</li>`).join('');
+    data.map(b => `<li>${b.name}</li>`).join('');
 }
 
 async function requestBook() {
@@ -41,14 +142,20 @@ async function requestBook() {
     body: JSON.stringify({ userName, bookId, type, address })
   });
 
-  alert("Book Requested!");
+  alert("✅ Book requested successfully!");
 }
 
 async function loadOrders() {
   const res = await fetch('/orders');
   const data = await res.json();
+
   document.getElementById('orders').innerHTML =
-    data.map(o => `<li>${o.userName} - Book ${o.bookId} (${o.type}) [${o.status}]</li>`).join('');
+    data.map(o => `
+      <li>
+        ${o.userName} → Book ${o.bookId} (${o.type})
+        <span class="status ${o.status.toLowerCase()}">[${o.status}]</span>
+      </li>
+    `).join('');
 }
 </script>
 
