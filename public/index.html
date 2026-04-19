@@ -1,53 +1,64 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Online Library</title>
+  <title>Library System</title>
   <style>
     body {
       margin: 0;
-      font-family: Arial, sans-serif;
-      background: #eef1f7;
+      font-family: 'Segoe UI', sans-serif;
+      background: #f4f6fb;
     }
 
     header {
-      background: linear-gradient(to right, #4a6cf7, #5f7cff);
+      background: #4a6cf7;
       color: white;
       padding: 15px 30px;
       font-size: 22px;
       font-weight: bold;
-      text-align: center;
     }
 
     .container {
-      display: flex;
-      gap: 20px;
-      padding: 30px;
+      max-width: 1100px;
+      margin: 30px auto;
+      padding: 0 20px;
     }
 
-    .card {
+    .section {
       background: white;
-      border-radius: 12px;
       padding: 20px;
-      flex: 1;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      border-radius: 10px;
+      margin-bottom: 20px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.08);
     }
 
     h2 {
       margin-top: 0;
+      color: #333;
     }
 
-    button {
-      background: #4a6cf7;
-      color: white;
-      border: none;
-      padding: 10px 15px;
-      border-radius: 6px;
+    .books {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 15px;
+    }
+
+    .book-card {
+      background: #fafafa;
+      padding: 15px;
+      border-radius: 8px;
+      border: 1px solid #eee;
       cursor: pointer;
-      margin-bottom: 10px;
+      transition: 0.2s;
     }
 
-    button:hover {
-      background: #3c58d1;
+    .book-card:hover {
+      background: #eef1ff;
+      border-color: #4a6cf7;
+    }
+
+    .selected {
+      border: 2px solid #4a6cf7;
+      background: #eef1ff;
     }
 
     input, select {
@@ -56,6 +67,19 @@
       margin: 8px 0;
       border-radius: 6px;
       border: 1px solid #ccc;
+    }
+
+    button {
+      background: #4a6cf7;
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #3a55d1;
     }
 
     table {
@@ -71,81 +95,60 @@
     }
 
     th {
-      background: #f3f4f6;
+      background: #f1f3f7;
     }
 
-    .status {
+    .tag {
       padding: 4px 8px;
-      border-radius: 6px;
+      border-radius: 5px;
       font-size: 12px;
       font-weight: bold;
     }
 
-    .pending {
-      background: #ffe4b5;
-      color: #b7791f;
+    .pickup {
+      background: #e0f7fa;
+      color: #00796b;
     }
 
-    .completed {
-      background: #d4edda;
-      color: #155724;
+    .delivery {
+      background: #fff3e0;
+      color: #e65100;
     }
   </style>
 </head>
 
 <body>
 
-<header>
-  📚 Online Library System
-</header>
+<header>📚 Online Library System</header>
 
 <div class="container">
 
-  <!-- Books -->
-  <div class="card">
-    <h2>📖 Available Books</h2>
-    <button onclick="loadBooks()">Load Books</button>
-    <table>
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Book Title</th>
-        </tr>
-      </thead>
-      <tbody id="books"></tbody>
-    </table>
+  <!-- BOOKS -->
+  <div class="section">
+    <h2>1️⃣ Browse Books</h2>
+    <div id="books" class="books"></div>
   </div>
 
-  <!-- Request -->
-  <div class="card">
-    <h2>📦 Request a Book</h2>
+  <!-- REQUEST -->
+  <div class="section">
+    <h2>2️⃣ Request Selected Book</h2>
 
-    <label>Your Name</label>
-    <input id="name">
+    <input id="name" placeholder="Your Name">
 
-    <label>Book</label>
-    <select id="bookId">
-      <option value="1">Harry Potter</option>
-      <option value="2">Atomic Habits</option>
-      <option value="3">Rich Dad Poor Dad</option>
-    </select>
-
-    <label>Request Type</label>
     <select id="type">
-      <option value="pickup">Pickup</option>
-      <option value="delivery">Delivery</option>
+      <option value="pickup">Pickup from Library</option>
+      <option value="delivery">Home Delivery</option>
     </select>
 
-    <label>Address (if delivery)</label>
-    <input id="address">
+    <input id="address" placeholder="Enter address (only for delivery)">
 
     <button onclick="requestBook()">Request Book</button>
   </div>
 
-  <!-- Orders -->
-  <div class="card">
-    <h2>📋 Current Orders</h2>
-    <button onclick="loadOrders()">View Orders</button>
+  <!-- ORDERS -->
+  <div class="section">
+    <h2>3️⃣ Your Orders</h2>
+    <button onclick="loadOrders()">Refresh</button>
 
     <table>
       <thead>
@@ -153,7 +156,7 @@
           <th>ID</th>
           <th>User</th>
           <th>Book</th>
-          <th>Requet Type</th>
+          <th>Type</th>
         </tr>
       </thead>
       <tbody id="orders"></tbody>
@@ -163,32 +166,53 @@
 </div>
 
 <script>
+let selectedBookId = null;
+
 async function loadBooks() {
   const res = await fetch('/books');
   const data = await res.json();
 
   document.getElementById('books').innerHTML =
-    data.map((b, i) => `
-      <tr>
-        <td>${i+1}</td>
-        <td>${b.name}</td>
-      </tr>
+    data.map(b => `
+      <div class="book-card" onclick="selectBook(${b.id}, this)">
+        <strong>${b.name}</strong><br>
+        <small>Click to select</small>
+      </div>
     `).join('');
+}
+
+function selectBook(id, element) {
+  selectedBookId = id;
+
+  document.querySelectorAll('.book-card')
+    .forEach(el => el.classList.remove('selected'));
+
+  element.classList.add('selected');
 }
 
 async function requestBook() {
   const userName = document.getElementById('name').value;
-  const bookId = document.getElementById('bookId').value;
   const type = document.getElementById('type').value;
   const address = document.getElementById('address').value;
+
+  if (!selectedBookId) {
+    alert("Please select a book first!");
+    return;
+  }
 
   await fetch('/request', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ userName, bookId, type, address })
+    body: JSON.stringify({
+      userName,
+      bookId: selectedBookId,
+      type,
+      address
+    })
   });
 
-  alert("Book requested!");
+  alert("✅ Request sent!");
+  loadOrders();
 }
 
 async function loadOrders() {
@@ -201,15 +225,17 @@ async function loadOrders() {
         <td>${o.id}</td>
         <td>${o.userName}</td>
         <td>Book ${o.bookId}</td>
-        
         <td>
-          <span class="status">
+          <span class="tag ${o.type}">
             ${o.type}
           </span>
         </td>
       </tr>
     `).join('');
 }
+
+// Load books on start
+loadBooks();
 </script>
 
 </body>
