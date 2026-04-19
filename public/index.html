@@ -1,35 +1,35 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Library System</title>
+  <title>Online Library</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: #f5f7fb;
       margin: 0;
+      font-family: Arial, sans-serif;
+      background: #eef1f7;
     }
 
     header {
-      background: #4a6cf7;
+      background: linear-gradient(to right, #4a6cf7, #5f7cff);
       color: white;
-      padding: 15px;
-      text-align: center;
+      padding: 15px 30px;
       font-size: 22px;
       font-weight: bold;
+      text-align: center;
     }
 
     .container {
       display: flex;
       gap: 20px;
-      padding: 20px;
+      padding: 30px;
     }
 
     .card {
       background: white;
+      border-radius: 12px;
       padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
       flex: 1;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
     }
 
     h2 {
@@ -40,38 +40,55 @@
       background: #4a6cf7;
       color: white;
       border: none;
-      padding: 10px;
-      border-radius: 5px;
+      padding: 10px 15px;
+      border-radius: 6px;
       cursor: pointer;
-      margin-top: 10px;
+      margin-bottom: 10px;
     }
 
     button:hover {
-      background: #3a55d1;
+      background: #3c58d1;
     }
 
     input, select {
       width: 100%;
-      padding: 8px;
-      margin: 5px 0;
-      border-radius: 5px;
+      padding: 10px;
+      margin: 8px 0;
+      border-radius: 6px;
       border: 1px solid #ccc;
     }
 
-    ul {
-      padding-left: 20px;
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    th, td {
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+      text-align: left;
+    }
+
+    th {
+      background: #f3f4f6;
     }
 
     .status {
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 12px;
       font-weight: bold;
     }
 
     .pending {
-      color: orange;
+      background: #ffe4b5;
+      color: #b7791f;
     }
 
     .completed {
-      color: green;
+      background: #d4edda;
+      color: #155724;
     }
   </style>
 </head>
@@ -86,37 +103,61 @@
 
   <!-- Books -->
   <div class="card">
-    <h2>📖 Books</h2>
+    <h2>📖 Available Books</h2>
     <button onclick="loadBooks()">Load Books</button>
-    <ul id="books"></ul>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Book Title</th>
+        </tr>
+      </thead>
+      <tbody id="books"></tbody>
+    </table>
   </div>
 
   <!-- Request -->
   <div class="card">
-    <h2>📦 Request Book</h2>
-    <input id="name" placeholder="Your Name">
-    
+    <h2>📦 Request a Book</h2>
+
+    <label>Your Name</label>
+    <input id="name">
+
+    <label>Book</label>
     <select id="bookId">
       <option value="1">Harry Potter</option>
       <option value="2">Atomic Habits</option>
       <option value="3">Rich Dad Poor Dad</option>
     </select>
 
+    <label>Request Type</label>
     <select id="type">
       <option value="pickup">Pickup</option>
       <option value="delivery">Delivery</option>
     </select>
 
-    <input id="address" placeholder="Address (for delivery)">
+    <label>Address (if delivery)</label>
+    <input id="address">
 
     <button onclick="requestBook()">Request Book</button>
   </div>
 
   <!-- Orders -->
   <div class="card">
-    <h2>📋 Orders</h2>
-    <button onclick="loadOrders()">Refresh Orders</button>
-    <ul id="orders"></ul>
+    <h2>📋 Current Orders</h2>
+    <button onclick="loadOrders()">View Orders</button>
+
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>User</th>
+          <th>Book</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="orders"></tbody>
+    </table>
   </div>
 
 </div>
@@ -127,7 +168,12 @@ async function loadBooks() {
   const data = await res.json();
 
   document.getElementById('books').innerHTML =
-    data.map(b => `<li>${b.name}</li>`).join('');
+    data.map((b, i) => `
+      <tr>
+        <td>${i+1}</td>
+        <td>${b.name}</td>
+      </tr>
+    `).join('');
 }
 
 async function requestBook() {
@@ -142,7 +188,7 @@ async function requestBook() {
     body: JSON.stringify({ userName, bookId, type, address })
   });
 
-  alert("✅ Book requested successfully!");
+  alert("Book requested!");
 }
 
 async function loadOrders() {
@@ -151,10 +197,16 @@ async function loadOrders() {
 
   document.getElementById('orders').innerHTML =
     data.map(o => `
-      <li>
-        ${o.userName} → Book ${o.bookId} (${o.type})
-        <span class="status ${o.status.toLowerCase()}">[${o.status}]</span>
-      </li>
+      <tr>
+        <td>${o.id}</td>
+        <td>${o.userName}</td>
+        <td>Book ${o.bookId}</td>
+        <td>
+          <span class="status ${o.status.toLowerCase()}">
+            ${o.status}
+          </span>
+        </td>
+      </tr>
     `).join('');
 }
 </script>
