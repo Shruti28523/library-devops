@@ -153,7 +153,7 @@
           <th>ID</th>
           <th>User</th>
           <th>Book</th>
-          <th>Status</th>
+          <th>Requet Type</th>
         </tr>
       </thead>
       <tbody id="orders"></tbody>
@@ -201,9 +201,10 @@ async function loadOrders() {
         <td>${o.id}</td>
         <td>${o.userName}</td>
         <td>Book ${o.bookId}</td>
+        
         <td>
-          <span class="status ${o.status.toLowerCase()}">
-            ${o.status}
+          <span class="status">
+            ${o.type}
           </span>
         </td>
       </tr>
